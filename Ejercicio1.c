@@ -6,8 +6,8 @@
 
 void menu_funciones(int metodo);
 void pedir_valores(int metodo, int opcion);
-void metodo_biseccion(float (*func)(float), float a, float b, int max_iter, float tol);
-void metodo_secante(float (*func)(float), float x0, float x1, int max_iter, float tol);
+void metodo_biseccion(float (*func)(float), float a, float b, int max_iter, float tol, int metodo, int opcion);
+void metodo_secante(float (*func)(float), float x0, float x1, int max_iter, float tol, int metodo, int opcion);
 float validar_flotante(char* entrada);
 int validar_entero(char* entrada);
 float funcion1(float x);
@@ -119,17 +119,18 @@ void pedir_valores(int metodo, int opcion){
 			break;
     }
 
-    max_iter=validar_entero("\n\nNúmero máximo de iteraciones: ");
-    tol=validar_flotante("Tolerancia: ");
-
     if(metodo==1){
+    	max_iter=validar_entero("\n\nNúmero máximo de iteraciones: ");    
+		tol=validar_flotante("Tolerancia (ej. 0.01): ");
         a=validar_flotante("Ingrese el valor de a: ");
         b=validar_flotante("Ingrese el valor de b: ");
-        metodo_biseccion(f, a, b, max_iter, tol);
+        metodo_biseccion(f, a, b, max_iter, tol, metodo, opcion);
     }else if(metodo==2){
+    	max_iter=validar_entero("\n\nNúmero máximo de iteraciones: ");    
+		tol=validar_flotante("Tolerancia (ej. 0.01): ");
         x0=validar_flotante("Ingrese el valor de x_(n-1): ");
         x1=validar_flotante("Ingrese el valor de x_(n): ");
-        metodo_secante(f, x0, x1, max_iter, tol);
+        metodo_secante(f, x0, x1, max_iter, tol, metodo, opcion);
     }
 }
 
@@ -138,7 +139,35 @@ float funcion2(float x){return (6 - (2 / pow(x, 2))) * (exp(2 + x) / 4) + 1;}
 float funcion3(float x){ return pow(x, 3) - 3 * sin(pow(x, 2)) + 1; }
 float funcion4(float x){ return pow(x, 3) + 6 * pow(x, 2) + (9.4 * x) + 2.5; }
 
-void metodo_biseccion(float(*func)(float), float a, float b, int max_iter, float tol){
+void pregunta_nuevo(int metodo, int opcion){
+    
+	int opt3;
+
+    do {
+        printf("¿Qué desea hacer?\n");
+        printf("1. Elegir otro intervalo\n");
+        printf("2. Regresar al menú de funciones\n");
+        printf("3. Salir\n\n");
+        opt3 = validar_entero("Ingrese una opción: ");
+
+        switch(opt3){
+            case 1:
+                pedir_valores(metodo, opcion);
+                break;
+            case 2:
+                return;
+            case 3:
+                printf("Finalizando el programa.\n");
+                exit(0);
+            default:
+                printf("Por favor, escoja una opción válida.\n");
+                system("pause");
+        }
+    } while (opt3 != 3);
+    
+}
+
+void metodo_biseccion(float(*func)(float), float a, float b, int max_iter, float tol, int metodo, int opcion){
     
 	int i;
     float fa=func(a), fb=func(b);
@@ -146,7 +175,8 @@ void metodo_biseccion(float(*func)(float), float a, float b, int max_iter, float
     if(fa*fb>0){
     	printf("-----------------------------------------------------------------------\n");
         printf("El intervalo no contiene una raíz.\n\n");
-        system("pause");
+        pregunta_nuevo(metodo,opcion);
+		system("pause");
         return;
 	}
     
@@ -162,7 +192,9 @@ void metodo_biseccion(float(*func)(float), float a, float b, int max_iter, float
         if (fabs(fpm) < tol || fabs(b - a) < tol) {
         	printf("\n\n-------------------------\n");
             printf("Raíz encontrada: %f\n", pm);
+            printf("Se encontró la raíz en la iteración #%d con una tolerancia de %f.\n",i+1,tol); 
             printf("-------------------------\n\n");
+            pregunta_nuevo(metodo,opcion);
             system("pause");
             return;
         }
@@ -176,16 +208,17 @@ void metodo_biseccion(float(*func)(float), float a, float b, int max_iter, float
     
     printf("-----------------------------------------------------------------------\n");
     printf("\n\nNo se encontró raíz en %d iteraciones.\n\n", max_iter);
+    pregunta_nuevo(metodo,opcion);
     system("pause");
     
 }
 
-void metodo_secante(float (*func)(float), float x0, float x1, int max_iter, float tol){
+void metodo_secante(float (*func)(float), float x0, float x1, int max_iter, float tol, int metodo, int opcion){
 	
     int i;
     
     printf("-----------------------------------------------------------------------\n");
-    printf("Iteración\tx_(n-1)\tx_(n)\tf(x_(n-1))\tf(x_(n))\tError Relativo\n");
+    printf("Iteración\tx_(n-1)\tx_(n)\tf(x_(n-1))\tf(x_(n))\tError Relativo porcentual\n");
 
     for(i=0;i<max_iter;i++){
         float f0 = func(x0);
@@ -194,27 +227,33 @@ void metodo_secante(float (*func)(float), float x0, float x1, int max_iter, floa
         if(fabs(f1-f0)<1e-6){
         	printf("-----------------------------------------------------------------------\n");
             printf("\n\nDivisión por cero.\n\n");
+            pregunta_nuevo(metodo,opcion);
             system("pause");
             return;
         }
 
         float x2=x1-(f1*(x1-x0)/(f1-f0));
-        float error=fabs(x2-x1);
+        float error=fabs((x2-x1)/x2)*100;
 	
 		printf("-----------------------------------------------------------------------\n");
         printf("%d\t%f\t%f\t%f\t%f\t%f\n", i, x0, x1, f0, f1, error);
 
         if (error<tol){
-            printf("\n\nRaíz encontrada: %f\n\n", x2);
+        	printf("\n\n-------------------------\n");
+            printf("Raíz encontrada: %f\n", x2);
+            printf("Se encontró la raíz en la iteración #%d con una tolerancia de %f%.\n",i+1,tol); 
+            printf("-------------------------\n\n");
+            pregunta_nuevo(metodo,opcion);
             system("pause");
-            return;
         }
 
         x0=x1;
         x1=x2;
     }
     printf("\n\nNo se encontró raíz en %d iteraciones.\n\n", max_iter);
+    pregunta_nuevo(metodo,opcion);
     system("pause");
+    
 }
 
 int validar_entero(char* mensaje){
