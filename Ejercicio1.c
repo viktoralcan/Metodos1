@@ -33,8 +33,8 @@ void Portada(){
     printf("\t\t\t\t   Profesor: Teresa Carrillo Ramírez\n");
     printf("\t\t\t\t  Integrantes:\n");
     printf("\t\t\t\t  Alcantara Mendez Victor Jesus\n");
-    printf("\t\t\t\t  Integrante 1\n");
-    printf("\t\t\t\t  Integrante 2\n");
+    printf("\t\t\t\t  Gutierrez Baeza Luis Daniel\n");
+    printf("\t\t\t\t  Soberanes Monroy Balam\n");
     printf("\t\t\t\t    Grupo: Extraordinario-Largo\n");
     printf("\t\t\t\t\t  Métodos Numéricos I\n");
     printf("\t\t\t\t Programa 1\n\n\n");
